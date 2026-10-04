@@ -31,7 +31,15 @@
         </button>
     </form>
     <p id="weather-status" class="text-sm text-slate-500 mb-4"></p>
-    <div></div>
+    <div id="weather-result" class="hidden bg-white rounded-2xl border border-slate-200 p-6">
+        <h2 id="w-city" class="text-xl font-semibold"></h2>
+        <p class="mt-2 text-6xl font-bold"><span id="w-temp">°C</span></p>
+        <p id="w-condition" class="mt-1" text-blue-600></p>
+        <div class="mt-4 flex gap-8 text-sm text-slate-500">
+            <p>humidity: <span id="w-humidity" class="text-slate-900"></span></p>
+            <p>Wind: <span id="w-wind" class="text-slate-900"></span></p>
+        </div>
+    </div>
 
 
     </section>
