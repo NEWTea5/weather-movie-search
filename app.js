@@ -40,3 +40,22 @@ form.addEventListener("submit", async function (event) {
     statusEl.textContent = error.message;
   }
 });
+
+const tabButtons = document.querySelectorAll(".tab-btn");
+const sections = document.querySelectorAll("main section");
+
+tabButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    sections.forEach(function (section) {
+      section.classList.add("hidden");
+    });
+    document.getElementById(button.dataset.target).classList.remove("hidden");
+
+    tabButtons.forEach(function (b) {
+      b.classList.remove("bg-blue-600", "text-white");
+      b.classList.add("text-slate-600");
+    });
+    button.classList.add("bg-blue-600", "text-white");
+    button.classList.remove("text-slate-600");
+  });
+});
