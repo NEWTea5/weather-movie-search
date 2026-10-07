@@ -16,7 +16,7 @@ if (!response.ok) {
 const data = await response.json();
 
 if (!data.results) {
-  throw new Error('city "' + city + '"not found. Check the spelling and try again.');
+  throw new Error('City "' + city + '" not found. Check the spelling and try again.');
 }
 
 return data.results[0];
@@ -64,8 +64,6 @@ form.addEventListener("submit", async function (event) {
     statusEl.textContent = "Please enter a city name.";
     return;
   }
-
-  statusEl.textContent = "Searching for " + city + "...";
   
   statusEl.textContent = "Loading...";
   document.getElementById("weather-result").classList.add("hidden");
@@ -101,4 +99,113 @@ tabButtons.forEach(function (button) {
     button.classList.add("bg-blue-600", "text-white");
     button.classList.remove("text-slate-600");
   });
+});
+
+const movieForm = document.getElementById("movie-form");
+const movieInput = document.getElementById("movie-input");
+const movieStatus = document.getElementById("movie-status");
+const movieGrid = document.getElementById("movie-grid");
+
+const OMDB_KEY = "e2b8e604";
+
+async function searchMovies(query) {
+  const url =
+    "https://www.omdbapi.com/?apikey=" + OMDB_KEY +
+    "&s=" + encodeURIComponent(query) +
+    "&type=movie";
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Could not reach the movie server. Try again.");
+  }
+
+  const data = await response.json();
+
+  if (data.Response === "False") {
+    if (data.Error === "Movie not found!") {
+      throw new Error('No movies found for "' + query + '".');
+    }
+    throw new Error(data.Error);
+  }
+
+  return data.Search;
+}
+
+async function getMovieDetails(id) {
+  const url = `https://www.omdbapi.com/?apikey=${OMDB_KEY}&i=${id}&plot=short`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Could not load movie details. Try again.");
+  }
+  return response.json();
+}
+
+function showMovies(movies) {
+  movieGrid.replaceChildren();
+
+  movies.forEach(function (movie) {
+    const card = document.createElement("article");
+    card.className = "bg-white rounded-xl border border-slate-200 overflow-hidden";
+
+    const poster = document.createElement("div");
+    poster.className = "aspect-[2/3] bg-slate-200 flex items-center justify-center text-sm text-slate-500";
+
+    if (movie.Poster && movie.Poster !== "N/A") {
+      const img = document.createElement("img");
+      img.src = movie.Poster;
+      img.alt = movie.Title + " poster";
+      img.className = "w-full h-full object-cover";
+      poster.replaceChildren(img);
+    } else {
+      poster.textContent = "No poster";
+    }
+
+    const info = document.createElement("div");
+    info.className = "p-3";
+
+    const title = document.createElement("h3");
+    title.className = "font-semibold text-sm";
+    title.textContent = movie.Title + " (" + movie.Year + ")";
+
+    const plot = document.createElement("p");
+    plot.className = "mt-1 text-xs text-slate-500";
+    plot.textContent = movie.Plot !== "N/A" ? movie.Plot : "No description available.";
+
+    info.append(title, plot);
+    card.append(poster, info);
+    movieGrid.append(card);
+  });
+}
+
+movieForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const query = movieInput.value.trim();
+
+  if (query === "") {
+    movieStatus.textContent = "Enter a movie title first.";
+    return;
+  }
+
+  movieStatus.textContent = "Searching...";
+  movieGrid.replaceChildren();
+
+  try {
+    const movies = await searchMovies(query);
+    const details = await Promise.all(
+      movies.map(function (movie) {
+        return getMovieDetails(movie.imdbID);
+      })
+    );
+    showMovies(details);
+    movieStatus.textContent = details.length + " results for \"" + query + "\".";
+  } catch (error) {
+    if (error instanceof TypeError) {
+      movieStatus.textContent = "Network error. Check your connection and try again.";
+    } else {
+      movieStatus.textContent = error.message;
+    }
+  }
 });
