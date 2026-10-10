@@ -12,3 +12,5 @@ HTML5
 Tailwind CSS
 JavaScript
 Git and GitHub
+
+the project is also deployed via netlify. project link - https://weather-movies.netlify.app
